@@ -70,8 +70,21 @@ function setupWebGL() {
 
 // read triangles in, load them into webgl buffers
 function loadTriangles() {
-    var inputTriangles = getJSONFile(INPUT_TRIANGLES_URL,"triangles");
-
+    //var inputTriangles = getJSONFile(INPUT_TRIANGLES_URL,"triangles");
+    var inputTriangles = [
+  {
+    "material": {"ambient": [0.1,0.1,0.1], "diffuse": [1,0.4,0.4], "specular": [0.3,0.3,0.3], "n":11}, 
+    "vertices": [[0.001, 0.6, 0.75],[0.25, 0.9, 0.75],[0.5,0.6,0.75]],
+    "normals": [[0, 0, -1],[0, 0, -1],[0, 0, -1]],
+    "triangles": [[0,1,2]]
+  },
+  {
+    "material": {"ambient": [0.1,0.1,0.1], "diffuse": [1,0.6,0.4], "specular": [0.3,0.3,0.3], "n":17}, 
+    "vertices": [[0.15, 0.15, 0.75],[0.15, 0.35, 0.75],[0.35,0.35,0.75],[0.35,0.15,0.75]],
+    "normals": [[0, 0, -1],[0, 0, -1],[0, 0, -1],[0, 0, -1]],
+    "triangles": [[0,1,2],[2,3,0]]
+  }
+];
     if (inputTriangles != String.null) { 
         var whichSetVert; // index of vertex in current triangle set
         var whichSetTri; // index of triangle in current triangle set
@@ -88,16 +101,18 @@ function loadTriangles() {
             // set up the vertex coord array
             for (whichSetVert=0; whichSetVert<inputTriangles[whichSet].vertices.length; whichSetVert++) {
                 vtxToAdd = inputTriangles[whichSet].vertices[whichSetVert];
-                coordArray.push(vtxToAdd[0],vtxToAdd[1],vtxToAdd[2]);
+                vtxToAdd[1][1] = 0.2;
+                coordArray.push(vtxToAdd[0]-0.5,vtxToAdd[1]+0.1,vtxToAdd[2]-1);
             } // end for vertices in set
             
             // set up the triangle index array, adjusting indices across sets
             for (whichSetTri=0; whichSetTri<inputTriangles[whichSet].triangles.length; whichSetTri++) {
                 vec3.add(triToAdd,indexOffset,inputTriangles[whichSet].triangles[whichSetTri]);
+                triToAdd[0][1] = triToAdd[0][1]-4;
                 indexArray.push(triToAdd[0],triToAdd[1],triToAdd[2]);
             } // end for triangles in set
 
-            vtxBufferSize += inputTriangles[whichSet].vertices.length; // total number of vertices
+            vtxBufferSize += inputTriangles[whichSet].vertices.length-3; // total number of vertices
             triBufferSize += inputTriangles[whichSet].triangles.length; // total number of tris
         } // end for each triangle set 
         triBufferSize *= 3; // now total number of indices
@@ -121,7 +136,7 @@ function setupShaders() {
     // define fragment shader in essl using es6 template strings
     var fShaderCode = `
         void main(void) {
-            gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0); // all fragments are white
+            gl_FragColor = vec4(0, 1.0, 1.0, 1.0); // all fragments are white
         }
     `;
     
